@@ -1,0 +1,57 @@
+[gd_scene format=3 uid="uid://brbpgtw0l2tbt"]
+
+[ext_resource type="Script" uid="uid://dsbt236p631xq" path="res://last_cutscene.gd" id="1_02in3"]
+[ext_resource type="Texture2D" uid="uid://xbmu878y855l" path="res://Screenshot 2026-09-14 155353.png" id="2_bt0aq"]
+[ext_resource type="Texture2D" uid="uid://xcr04a1agdd6" path="res://owl sierra.png" id="3_165kx"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_aosia"]
+atlas = ExtResource("3_165kx")
+region = Rect2(4.0252533, 0, 24.974747, 24.60587)
+
+[node name="Last Cutscene" type="Control" unique_id=2067950003]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_02in3")
+
+[node name="Background" type="TextureRect" parent="." unique_id=571064441]
+layout_mode = 0
+offset_right = 1140.0
+offset_bottom = 638.0
+texture = ExtResource("2_bt0aq")
+
+[node name="CharLeft" type="TextureRect" parent="." unique_id=118011451]
+layout_mode = 0
+offset_left = -8.0
+offset_top = 133.0
+offset_right = 321.0
+offset_bottom = 462.0
+texture = SubResource("AtlasTexture_aosia")
+
+[node name="DialogBox" type="Panel" parent="." unique_id=1338240277]
+layout_mode = 0
+offset_left = -1.0
+offset_top = 461.0
+offset_right = 1145.0
+offset_bottom = 643.0
+
+[node name="Name" type="RichTextLabel" parent="DialogBox" unique_id=670155399]
+layout_mode = 0
+offset_left = 108.0
+offset_top = 3.0
+offset_right = 208.0
+offset_bottom = 47.0
+theme_override_font_sizes/normal_font_size = 25
+text = "Sierra"
+
+[node name="Dialog" type="RichTextLabel" parent="DialogBox" unique_id=1494166812]
+layout_mode = 0
+offset_left = 124.0
+offset_top = 46.0
+offset_right = 1068.0
+offset_bottom = 95.0
+theme_override_font_sizes/normal_font_size = 30
+text = "\"Kata dosen, aku disuruh menghitung waktu teller melayani.\""

@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://nymg2y1s6e1i"]
+
+[ext_resource type="Script" uid="uid://xs510ngcmxj0" path="res://worksheet_antrian.gd" id="1_xqmqi"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bcpft"]
+bg_color = Color(0.8638137, 0.86381376, 0.8638136, 1)
+
+[node name="WorksheetAntrian" type="Control" unique_id=995924314]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_xqmqi")
+
+[node name="Panel" type="Panel" parent="." unique_id=1254744119]
+layout_mode = 0
+offset_right = 1152.0
+offset_bottom = 653.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_bcpft")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel" unique_id=1491340643]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 31.0
+offset_top = 23.0
+offset_right = -80.0
+offset_bottom = -34.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Panel/VBoxContainer" unique_id=1376698986]
+layout_mode = 2
+
+[node name="GridContainer" type="GridContainer" parent="Panel/VBoxContainer" unique_id=1750190897]
+layout_mode = 2

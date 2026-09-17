@@ -1,0 +1,68 @@
+[gd_scene format=3 uid="uid://b81suw7mwtnea"]
+
+[ext_resource type="Script" uid="uid://b88hfd2gfmopp" path="res://welcome_tadc.gd" id="1_prm66"]
+[ext_resource type="Texture2D" uid="uid://xbmu878y855l" path="res://Screenshot 2026-09-14 155353.png" id="2_1tijc"]
+[ext_resource type="Texture2D" uid="uid://b4k8gxi3wpow7" path="res://caine sprite.png" id="3_1tijc"]
+[ext_resource type="Texture2D" uid="uid://xcr04a1agdd6" path="res://owl sierra.png" id="3_loth1"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qs7dp"]
+atlas = ExtResource("3_loth1")
+region = Rect2(0.17240143, 0.72825813, 31.333374, 27.66391)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s4is2"]
+atlas = ExtResource("3_1tijc")
+region = Rect2(0.74209976, 32.370758, 27.249462, 27.584496)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1tijc"]
+atlas = ExtResource("3_loth1")
+region = Rect2(4.0252533, 0, 24.974747, 24.60587)
+
+[node name="Welcome TADC" type="Control" unique_id=294177719]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_prm66")
+sierra_texture = SubResource("AtlasTexture_qs7dp")
+caine_texture = SubResource("AtlasTexture_s4is2")
+
+[node name="Background" type="TextureRect" parent="." unique_id=1860003189]
+layout_mode = 0
+offset_right = 1140.0
+offset_bottom = 638.0
+texture = ExtResource("2_1tijc")
+
+[node name="CharLeft" type="TextureRect" parent="." unique_id=802502022]
+layout_mode = 0
+offset_left = -8.0
+offset_top = 133.0
+offset_right = 321.0
+offset_bottom = 462.0
+texture = SubResource("AtlasTexture_1tijc")
+
+[node name="DialogBox" type="Panel" parent="." unique_id=1349639126]
+layout_mode = 0
+offset_left = -1.0
+offset_top = 461.0
+offset_right = 1145.0
+offset_bottom = 643.0
+
+[node name="Name" type="RichTextLabel" parent="DialogBox" unique_id=211503152]
+layout_mode = 0
+offset_left = 108.0
+offset_top = 3.0
+offset_right = 208.0
+offset_bottom = 47.0
+theme_override_font_sizes/normal_font_size = 25
+text = "Sierra"
+
+[node name="Dialog" type="RichTextLabel" parent="DialogBox" unique_id=718006646]
+layout_mode = 0
+offset_left = 124.0
+offset_top = 46.0
+offset_right = 1068.0
+offset_bottom = 95.0
+theme_override_font_sizes/normal_font_size = 30
+text = "\"Kata dosen, aku disuruh menghitung waktu teller melayani.\""
