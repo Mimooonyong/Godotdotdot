@@ -1,5 +1,4 @@
 extends Node2D
-class_name NPCUnit
 
 ## ==========================================================
 ## npc_unit.gd
