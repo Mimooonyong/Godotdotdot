@@ -1,8 +1,8 @@
 extends Node
 
 # --- Data soal ---
-var iat_batch1: Array[float] = [10.0, 10.0, 20.0, 10.5, 30.0]
-var layan_batch1: Array[float] = [4.0, 3.0, 5.0, 2.0, 4.0]
+var iat_batch1: Array[float] = []
+var layan_batch1: Array[float] = []
 
 var iat_batch2: Array[float] = []
 var layan_batch2: Array[float] = []

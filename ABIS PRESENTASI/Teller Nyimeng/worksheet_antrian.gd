@@ -7,13 +7,13 @@ extends Control
 const TOTAL_ROWS := 10
 const QUESTION_ROWS := 5
 
-# >>> DITAMBAHKAN "Teller" di daftar kolom
-const COLUMNS := ["N", "IAT", "Layanan", "Datang", "Teller", "Mulai", "Selesai", "Antri", "Sistem", "Idle"]
-const EDITABLE_COLUMNS := ["IAT", "Layanan", "Datang", "Teller", "Mulai", "Selesai", "Antri", "Sistem", "Idle"]
+# >>> DIREVISI: Kolom Ditambah "Selesai T1" dan "Selesai T2"
+const COLUMNS := ["N", "IAT", "Layanan", "Datang", "Teller", "Mulai", "Selesai T1", "Selesai T2", "Antri", "Sistem", "Idle"]
+const EDITABLE_COLUMNS := ["IAT", "Layanan", "Datang", "Teller", "Mulai", "Selesai T1", "Selesai T2", "Antri", "Sistem", "Idle"]
 
 const CELL_HEIGHT := 40
-const HEADER_FONT_SIZE := 16
-const CELL_FONT_SIZE := 14
+const HEADER_FONT_SIZE := 14  # Diperkecil sedikit agar muat 11 kolom
+const CELL_FONT_SIZE := 13
 const TEXT_COLOR := Color(0.12, 0.08, 0.04)
 
 const COLOR_DEFAULT_BG := Color(1, 1, 1)
@@ -21,7 +21,7 @@ const COLOR_CORRECT_BG := Color(0.75, 0.95, 0.75)
 const COLOR_WRONG_BG := Color(0.98, 0.75, 0.75)
 const FLOAT_TOLERANCE := 0.01
 
-const ENTER_TO_NEXT_DELAY := 1.2
+const ENTER_TO_NEXT_DELAY := 7
 
 @export var interarrival_times: Array[float] = [2.0, 2.0, 2.0, 2.0, 2.0]
 @export var service_times: Array[float] = [1.0, 1.0, 1.0, 1.0, 1.0]
@@ -31,6 +31,10 @@ var correct_answers: Array = []
 var enter_button: Button
 
 func _ready() -> void:
+	if SimState.iat_batch1.size() > 0:
+		interarrival_times = SimState.iat_batch1
+		service_times = SimState.layan_batch1
+
 	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_KEEP_SIZE, 40)
 	panel.clip_contents = true
 
@@ -54,7 +58,7 @@ func _ready() -> void:
 	grid.columns = COLUMNS.size()
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation", 6)
+	grid.add_theme_constant_override("h_separation", 4)
 	grid.add_theme_constant_override("v_separation", 6)
 
 	_compute_correct_answers()
@@ -67,14 +71,13 @@ func _ready() -> void:
 	else:
 		_activate_question_rows()
 
-# --- LOGIKA RUMUS SIMULASI 2 TELLER ---
+# --- LOGIKA SIMULASI 2 TELLER (DENGAN DETAIL TELLER 1 & TELLER 2) ---
 func _compute_correct_answers() -> void:
 	correct_answers.clear()
 	var prev_datang := 0.0
 	
-	# Melacak kapan Teller 1 dan Teller 2 selesai melayani
-	var teller1_free_time := 0.0
-	var teller2_free_time := 0.0
+	var teller1_free_at := 0.0
+	var teller2_free_at := 0.0
 
 	for i in QUESTION_ROWS:
 		var iat: float = interarrival_times[i]
@@ -82,43 +85,43 @@ func _compute_correct_answers() -> void:
 		var datang: float = prev_datang + iat
 
 		var chosen_teller := 1
-		var teller_free_at := 0.0
+		var teller_prev_free := 0.0
 
-		# Prioritaskan Teller 1. Jika Teller 1 masih sibuk dan Teller 2 selesai lebih awal/sama, pilih Teller 2.
-		if teller1_free_time <= datang:
+		if teller1_free_at <= datang:
 			chosen_teller = 1
-			teller_free_at = teller1_free_time
-		elif teller2_free_time <= datang:
+			teller_prev_free = teller1_free_at
+		elif teller2_free_at <= datang:
 			chosen_teller = 2
-			teller_free_at = teller2_free_time
+			teller_prev_free = teller2_free_at
 		else:
-			# Jika kedua teller sibuk, pilih teller yang pertama kali selesai
-			if teller1_free_time <= teller2_free_time:
+			if teller1_free_at <= teller2_free_at:
 				chosen_teller = 1
-				teller_free_at = teller1_free_time
+				teller_prev_free = teller1_free_at
 			else:
 				chosen_teller = 2
-				teller_free_at = teller2_free_time
+				teller_prev_free = teller2_free_at
 
-		var mulai: float = max(datang, teller_free_at)
+		var mulai: float = max(datang, teller_prev_free)
 		var selesai: float = mulai + layan
+
+		# Update status bebas masing-masing teller
+		if chosen_teller == 1:
+			teller1_free_at = selesai
+		else:
+			teller2_free_at = selesai
+
 		var antri: float = mulai - datang
 		var sistem: float = selesai - datang
-		var idle: float = max(0.0, datang - teller_free_at)
-
-		# Update waktu bebas untuk teller yang terpilih
-		if chosen_teller == 1:
-			teller1_free_time = selesai
-		else:
-			teller2_free_time = selesai
+		var idle: float = max(0.0, datang - teller_prev_free)
 
 		correct_answers.append({
 			"IAT": iat,
 			"Layanan": layan,
 			"Datang": datang,
-			"Teller": float(chosen_teller), # Disimpan float agar mudah dicocokkan
+			"Teller": float(chosen_teller),
 			"Mulai": mulai,
-			"Selesai": selesai,
+			"Selesai T1": teller1_free_at,
+			"Selesai T2": teller2_free_at,
 			"Antri": antri,
 			"Sistem": sistem,
 			"Idle": idle,
@@ -240,6 +243,7 @@ func _on_enter_button_pressed() -> void:
 	SimState.batch1_done = true
 	get_tree().change_scene_to_file(SimState.sleep_dialog_scene_path)
 
+# >>> DIREVISI: Jika salah, teks diganti dengan jawaban benar & box tetap merah
 func _grade_rows() -> bool:
 	var all_correct := true
 	for i in QUESTION_ROWS:
@@ -254,8 +258,7 @@ func _grade_rows() -> bool:
 				field.add_theme_stylebox_override("read_only", _make_cell_style(COLOR_CORRECT_BG))
 			else:
 				all_correct = false
-				# Ubah teks ke jawaban yang benar & warnai kotak jadi merah
-				field.text = str(expected_val)
+				field.text = str(expected_val) # Tunjukkan jawaban yang benar
 				field.add_theme_stylebox_override("normal", _make_cell_style(COLOR_WRONG_BG))
 				field.add_theme_stylebox_override("read_only", _make_cell_style(COLOR_WRONG_BG))
 				
@@ -267,6 +270,7 @@ func _is_answer_correct(user_text: String, expected_value: float) -> bool:
 		return false
 	return abs(clean.to_float() - expected_value) < FLOAT_TOLERANCE
 
+# >>> DIREVISI: Menyimpan teks akhir (yang sudah dikoreksi jika ada salah) ke SimState
 func _save_answers() -> void:
 	var answers := []
 	for i in QUESTION_ROWS:
