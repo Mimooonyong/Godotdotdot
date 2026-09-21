@@ -82,37 +82,53 @@ func _compute_correct_answers() -> void:
 	for i in QUESTION_ROWS:
 		var iat: float = interarrival_times[i]
 		var layan: float = service_times[i]
-		var datang: float = prev_datang + iat
+		
+		# 1. Datang: Baris 1 = IAT; Baris berikutnya = Datang sebelumnya + IAT
+		var datang: float = iat if i == 0 else prev_datang + iat
 
+		# 2. Teller & Waktu Kosong Terakhir
 		var chosen_teller := 1
 		var teller_prev_free := 0.0
 
-		if teller1_free_at <= datang:
-			chosen_teller = 1
-			teller_prev_free = teller1_free_at
-		elif teller2_free_at <= datang:
-			chosen_teller = 2
-			teller_prev_free = teller2_free_at
-		else:
-			if teller1_free_at <= teller2_free_at:
+		# Teller yang lebih dulu kosong; jika seri pilih Teller 1
+		if teller1_free_at <= teller2_free_at:
+			if teller1_free_at <= datang:
 				chosen_teller = 1
 				teller_prev_free = teller1_free_at
+			elif teller2_free_at <= datang:
+				chosen_teller = 2
+				teller_prev_free = teller2_free_at
+			else:
+				chosen_teller = 1
+				teller_prev_free = teller1_free_at
+		else:
+			if teller2_free_at <= datang:
+				chosen_teller = 2
+				teller_prev_free = teller2_free_at
 			else:
 				chosen_teller = 2
 				teller_prev_free = teller2_free_at
 
+		# 3. Mulai: Nilai terbesar antara Datang dan teller yang lebih cepat kosong
 		var mulai: float = max(datang, teller_prev_free)
+
+		# 4. Selesai: Mulai + Layan
 		var selesai: float = mulai + layan
 
-		# Update status bebas masing-masing teller
+		# Update Selesai T1 / Selesai T2
 		if chosen_teller == 1:
 			teller1_free_at = selesai
 		else:
 			teller2_free_at = selesai
 
+		# 5. Antri: Mulai - Datang
 		var antri: float = mulai - datang
+
+		# 6. Sistem: Selesai - Datang
 		var sistem: float = selesai - datang
-		var idle: float = max(0.0, datang - teller_prev_free)
+
+		# 7. Idle: Mulai - waktu selesai terakhir teller yang melayani (Sesuai Gambar)
+		var idle: float = mulai - teller_prev_free
 
 		correct_answers.append({
 			"IAT": iat,
@@ -128,7 +144,7 @@ func _compute_correct_answers() -> void:
 		})
 
 		prev_datang = datang
-
+		
 func _build_header() -> void:
 	for col_name in COLUMNS:
 		var lbl := Label.new()
