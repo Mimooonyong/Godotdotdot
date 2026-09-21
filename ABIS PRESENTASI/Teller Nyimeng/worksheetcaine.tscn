@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://dxjje28b7t0ev"]
+
+[ext_resource type="Script" uid="uid://dxtw6u5fwaatx" path="res://worksheetcaine.gd" id="1_rd2wx"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hfuw7"]
+bg_color = Color(0.8638137, 0.86381376, 0.8638136, 1)
+
+[node name="Control" type="Control" unique_id=555669377]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_rd2wx")
+
+[node name="Panel" type="Panel" parent="." unique_id=945818244]
+layout_mode = 0
+offset_right = 1152.0
+offset_bottom = 653.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_hfuw7")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel" unique_id=174292140]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 31.0
+offset_top = 23.0
+offset_right = -80.0
+offset_bottom = -34.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Panel/VBoxContainer" unique_id=880056550]
+layout_mode = 2
+
+[node name="GridContainer" type="GridContainer" parent="Panel/VBoxContainer" unique_id=2140691349]
+layout_mode = 2

@@ -5,16 +5,11 @@
 [ext_resource type="Texture2D" uid="uid://b4k8gxi3wpow7" path="res://caine sprite.png" id="2_vqdq3"]
 [ext_resource type="Script" uid="uid://cn28u77yr8og3" path="res://mc.gd" id="3_mocgf"]
 [ext_resource type="Texture2D" uid="uid://xcr04a1agdd6" path="res://owl sierra.png" id="4_0ce8g"]
-[ext_resource type="Script" uid="uid://cnniep246d0po" path="res://npc_spawner.gd" id="6_y77be"]
-[ext_resource type="PackedScene" uid="uid://bgyprv4n5oqi5" path="res://kinger.tscn" id="7_kabrr"]
-[ext_resource type="Script" uid="uid://cwjym3poolbdi" path="res://npc.gd" id="7_lxo6v"]
-[ext_resource type="PackedScene" uid="uid://dkk5ogqtu0qlb" path="res://jax.tscn" id="8_c3br3"]
-[ext_resource type="PackedScene" uid="uid://bslpjmvfghahe" path="res://pomni.tscn" id="9_ta248"]
-[ext_resource type="PackedScene" uid="uid://roiejsbfoukf" path="res://ragatha.tscn" id="10_sg43w"]
-[ext_resource type="PackedScene" uid="uid://cis1hfvma37f8" path="res://zooble.tscn" id="11_doclt"]
-[ext_resource type="PackedScene" uid="uid://daekwdnacspfx" path="res://gangle.tscn" id="12_g81mt"]
+[ext_resource type="Script" uid="uid://b3mjojq7m64kf" path="res://npc_spawner_1.gd" id="6_y77be"]
+[ext_resource type="Script" uid="uid://bqiqyie8qt0ji" path="res://npc_1.gd" id="7_lxo6v"]
+[ext_resource type="Script" uid="uid://dryga7erutdre" path="res://simulation_table.gd" id="14_c3br3"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_mocgf"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lxo6v"]
 texture = ExtResource("1_vuq7w")
 0:0/0 = 0
 1:0/0 = 0
@@ -37,7 +32,7 @@ texture = ExtResource("1_vuq7w")
 6:0/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_p5viw"]
-sources/0 = SubResource("TileSetAtlasSource_mocgf")
+sources/0 = SubResource("TileSetAtlasSource_lxo6v")
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0ce8g"]
 atlas = ExtResource("2_vqdq3")
@@ -315,19 +310,19 @@ position = Vector2(-0.5, 5)
 shape = SubResource("RectangleShape2D_7h7mn")
 
 [node name="Camera2D" type="Camera2D" parent="MC" unique_id=370827283]
-zoom = Vector2(4, 4)
+zoom = Vector2(2, 2)
 
-[node name="NPCSpawner" type="Node2D" parent="." unique_id=1223777460 node_paths=PackedStringArray("teller", "spawn_point", "queue_slots", "service_point", "despawn_point", "npc_container")]
+[node name="NPCSpawner1" type="Node2D" parent="." unique_id=1223777460]
 script = ExtResource("6_y77be")
-npc_scenes = Array[PackedScene]([ExtResource("7_kabrr"), ExtResource("8_c3br3"), ExtResource("9_ta248"), ExtResource("10_sg43w"), ExtResource("11_doclt"), ExtResource("12_g81mt")])
-interarrival_times = Array[float]([3.0, 4.0, 3.5, 8.0, 5.0, 6.0])
-service_times = Array[float]([8.0, 6.0, 3.0, 7.0, 4.0, 3.0])
-teller = NodePath("../Teller")
-spawn_point = NodePath("../Teller/spawn")
-queue_slots = [NodePath("../Teller/queue"), NodePath("../Teller/queue1"), NodePath("../Teller/queue2")]
-service_point = NodePath("../Teller/exit point")
-despawn_point = NodePath("../Teller/despawn")
-npc_container = NodePath("../NPC")
 
-[node name="NPC" type="Node2D" parent="." unique_id=1256894095]
+[node name="NPC1" type="Node2D" parent="." unique_id=1256894095]
 script = ExtResource("7_lxo6v")
+
+[node name="Simulation_table" type="Control" parent="." unique_id=405517196]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 836.0
+offset_top = 233.0
+offset_right = 847.2955
+offset_bottom = 240.0
+script = ExtResource("14_c3br3")
