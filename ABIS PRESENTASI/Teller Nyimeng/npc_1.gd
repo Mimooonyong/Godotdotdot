@@ -1,20 +1,31 @@
 extends Node2D
-class_name NPCUnit
+class_name NPCUnit1
 
 ## ==========================================================
-## npc_unit.gd
-## Mengatur pergerakan dan animasi setiap NPC.
-## Dipakai oleh semua NPC:
-## kinger, pomni, jax, ragatha, zooble, gangle
+## npc_unit_1.gd
+##
+## Script dasar untuk semua NPC pelanggan:
+## kinger, pomni, jax, ragatha, zooble, gangle.
+##
+## Menangani:
+## - pergerakan (tween)
+## - pemilihan animasi otomatis
+##
+## Pasang script ini di root scene tiap NPC:
+## kinger.tscn
+## pomni.tscn
+## jax.tscn
+## ragatha.tscn
+## zooble.tscn
+## gangle.tscn
+##
+## lalu isi "npc_id" dan drag AnimatedSprite2D
+## ke "animated_sprite" di Inspector.
 ## ==========================================================
 
 
 signal reached_target
 
-
-# ==========================================================
-# DATA NPC
-# ==========================================================
 
 @export var npc_id: String = ""
 
@@ -49,10 +60,6 @@ var service_time: float = 1.0
 var is_being_served: bool = false
 
 
-# ==========================================================
-# READY
-# ==========================================================
-
 func _ready() -> void:
 
 	if animated_sprite == null:
@@ -81,10 +88,7 @@ func _find_animated_sprite() -> AnimatedSprite2D:
 
 func play_anim(anim_name: String) -> void:
 
-	if animated_sprite == null:
-		return
-
-	if animated_sprite.sprite_frames == null:
+	if animated_sprite == null or animated_sprite.sprite_frames == null:
 		return
 
 	if not animated_sprite.sprite_frames.has_animation(anim_name):
@@ -95,7 +99,7 @@ func play_anim(anim_name: String) -> void:
 
 
 # ==========================================================
-# IDLE / EMOSI
+# IDLE BIASA / EMOSI
 # ==========================================================
 
 func play_idle_or_emotion(emotion_anim: String = "") -> void:
@@ -104,14 +108,16 @@ func play_idle_or_emotion(emotion_anim: String = "") -> void:
 		return
 
 	if emotion_anim != "":
+
 		play_anim(emotion_anim)
 
 	else:
+
 		play_anim(ANIM_IDLE)
 
 
 # ==========================================================
-# BERJALAN KE SATU TITIK
+# JALAN KE SATU TITIK
 # ==========================================================
 
 func move_to(
@@ -119,13 +125,16 @@ func move_to(
 	walk_anim: String = ANIM_WALK_BACK
 ) -> void:
 
-	await _tween_to(target_pos, walk_anim)
+	await _tween_to(
+		target_pos,
+		walk_anim
+	)
 
 	reached_target.emit()
 
 
 # ==========================================================
-# BERJALAN LEWAT BEBERAPA TITIK
+# JALAN LEWAT BEBERAPA TITIK
 # ==========================================================
 
 func walk_path(
@@ -135,7 +144,10 @@ func walk_path(
 
 	for p in points:
 
-		await _tween_to(p, walk_anim)
+		await _tween_to(
+			p,
+			walk_anim
+		)
 
 	reached_target.emit()
 
@@ -180,6 +192,8 @@ func start_service() -> void:
 
 	play_anim(ANIM_SERVED)
 
-	await get_tree().create_timer(service_time).timeout
+	await get_tree().create_timer(
+		service_time
+	).timeout
 
 	is_being_served = false
