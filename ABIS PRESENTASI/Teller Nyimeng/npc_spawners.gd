@@ -31,6 +31,10 @@ var _all_spawned: bool = false
 var _cutscene_triggered: bool = false
 
 func _ready() -> void:
+	# Kirim data soal dari Spawner ke SimState agar dibaca Worksheet
+	SimState.iat_batch1 = interarrival_times
+	SimState.layan_batch1 = service_times
+
 	_total_customers = interarrival_times.size()
 	_run_simulation()
 
