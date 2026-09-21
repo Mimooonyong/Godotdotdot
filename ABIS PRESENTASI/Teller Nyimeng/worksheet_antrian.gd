@@ -5,37 +5,32 @@ extends Control
 @onready var grid: GridContainer = $Panel/VBoxContainer/GridContainer
 
 const TOTAL_ROWS := 10
-const QUESTION_ROWS := 5  # hanya baris 1-5 yang bisa diisi & diperiksa
-const COLUMNS := ["N", "IAT", "Layanan", "Datang", "Mulai", "Selesai", "Antri", "Sistem", "Idle"]
+const QUESTION_ROWS := 5
 
-# Semua kolom selain "N" sekarang harus diisi & dihitung sendiri oleh siswa,
-# termasuk IAT dan Layanan.
-const EDITABLE_COLUMNS := ["IAT", "Layanan", "Datang", "Mulai", "Selesai", "Antri", "Sistem", "Idle"]
+# >>> DITAMBAHKAN "Teller" di daftar kolom
+const COLUMNS := ["N", "IAT", "Layanan", "Datang", "Teller", "Mulai", "Selesai", "Antri", "Sistem", "Idle"]
+const EDITABLE_COLUMNS := ["IAT", "Layanan", "Datang", "Teller", "Mulai", "Selesai", "Antri", "Sistem", "Idle"]
 
 const CELL_HEIGHT := 40
-const HEADER_FONT_SIZE := 18
-const CELL_FONT_SIZE := 16
-const TEXT_COLOR := Color(0.12, 0.08, 0.04)  # coklat gelap/hitam
+const HEADER_FONT_SIZE := 16
+const CELL_FONT_SIZE := 14
+const TEXT_COLOR := Color(0.12, 0.08, 0.04)
 
 const COLOR_DEFAULT_BG := Color(1, 1, 1)
-const COLOR_CORRECT_BG := Color(0.75, 0.95, 0.75)  # hijau muda
-const COLOR_WRONG_BG := Color(0.98, 0.75, 0.75)    # merah muda
+const COLOR_CORRECT_BG := Color(0.75, 0.95, 0.75)
+const COLOR_WRONG_BG := Color(0.98, 0.75, 0.75)
 const FLOAT_TOLERANCE := 0.01
 
-const ENTER_TO_NEXT_DELAY := 1.2  # jeda (detik) sebelum pindah scene, biar warna sempat kelihatan
+const ENTER_TO_NEXT_DELAY := 1.2
 
-# --- Kunci jawaban untuk IAT & Layanan (hanya dipakai untuk baris 1-5) ---
-# Nilai ini TIDAK ditampilkan ke siswa; dipakai backend untuk menghitung &
-# memeriksa jawaban IAT, Layanan, dan semua kolom turunannya.
 @export var interarrival_times: Array[float] = [2.0, 2.0, 2.0, 2.0, 2.0]
 @export var service_times: Array[float] = [1.0, 1.0, 1.0, 1.0, 1.0]
 
 var row_inputs: Array = []
-var correct_answers: Array = []  # Array[Dictionary], hasil hitung rumus baris 1-5
+var correct_answers: Array = []
 var enter_button: Button
 
 func _ready() -> void:
-	# --- Panel full rect dengan margin seragam 40px ---
 	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_KEEP_SIZE, 40)
 	panel.clip_contents = true
 
@@ -45,10 +40,10 @@ func _ready() -> void:
 	panel_style.corner_radius_top_right = 12
 	panel_style.corner_radius_bottom_left = 12
 	panel_style.corner_radius_bottom_right = 12
-	panel_style.content_margin_left = 24
-	panel_style.content_margin_right = 24
-	panel_style.content_margin_top = 24
-	panel_style.content_margin_bottom = 24
+	panel_style.content_margin_left = 16
+	panel_style.content_margin_right = 16
+	panel_style.content_margin_top = 16
+	panel_style.content_margin_bottom = 16
 	panel.add_theme_stylebox_override("panel", panel_style)
 
 	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -59,8 +54,8 @@ func _ready() -> void:
 	grid.columns = COLUMNS.size()
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation", 8)
-	grid.add_theme_constant_override("v_separation", 8)
+	grid.add_theme_constant_override("h_separation", 6)
+	grid.add_theme_constant_override("v_separation", 6)
 
 	_compute_correct_answers()
 	_build_header()
@@ -72,35 +67,56 @@ func _ready() -> void:
 	else:
 		_activate_question_rows()
 
-# --- Hitung kunci jawaban untuk baris 1-5 berdasarkan rumus antrian ---
-# IAT     = interarrival_times[i]
-# Layanan = service_times[i]
-# Datang  = Datang_sebelumnya + IAT
-# Mulai   = max(Datang, Selesai_sebelumnya)
-# Selesai = Mulai + Layanan
-# Antri   = Mulai - Datang
-# Sistem  = Selesai - Datang
-# Idle    = max(0, Datang - Selesai_sebelumnya)
+# --- LOGIKA RUMUS SIMULASI 2 TELLER ---
 func _compute_correct_answers() -> void:
 	correct_answers.clear()
 	var prev_datang := 0.0
-	var prev_selesai := 0.0
+	
+	# Melacak kapan Teller 1 dan Teller 2 selesai melayani
+	var teller1_free_time := 0.0
+	var teller2_free_time := 0.0
 
 	for i in QUESTION_ROWS:
 		var iat: float = interarrival_times[i]
 		var layan: float = service_times[i]
-
 		var datang: float = prev_datang + iat
-		var mulai: float = max(datang, prev_selesai)
+
+		var chosen_teller := 1
+		var teller_free_at := 0.0
+
+		# Prioritaskan Teller 1. Jika Teller 1 masih sibuk dan Teller 2 selesai lebih awal/sama, pilih Teller 2.
+		if teller1_free_time <= datang:
+			chosen_teller = 1
+			teller_free_at = teller1_free_time
+		elif teller2_free_time <= datang:
+			chosen_teller = 2
+			teller_free_at = teller2_free_time
+		else:
+			# Jika kedua teller sibuk, pilih teller yang pertama kali selesai
+			if teller1_free_time <= teller2_free_time:
+				chosen_teller = 1
+				teller_free_at = teller1_free_time
+			else:
+				chosen_teller = 2
+				teller_free_at = teller2_free_time
+
+		var mulai: float = max(datang, teller_free_at)
 		var selesai: float = mulai + layan
 		var antri: float = mulai - datang
 		var sistem: float = selesai - datang
-		var idle: float = max(0.0, datang - prev_selesai)
+		var idle: float = max(0.0, datang - teller_free_at)
+
+		# Update waktu bebas untuk teller yang terpilih
+		if chosen_teller == 1:
+			teller1_free_time = selesai
+		else:
+			teller2_free_time = selesai
 
 		correct_answers.append({
 			"IAT": iat,
 			"Layanan": layan,
 			"Datang": datang,
+			"Teller": float(chosen_teller), # Disimpan float agar mudah dicocokkan
 			"Mulai": mulai,
 			"Selesai": selesai,
 			"Antri": antri,
@@ -109,7 +125,6 @@ func _compute_correct_answers() -> void:
 		})
 
 		prev_datang = datang
-		prev_selesai = selesai
 
 func _build_header() -> void:
 	for col_name in COLUMNS:
@@ -150,9 +165,7 @@ func _build_rows() -> void:
 				lbl.add_theme_color_override("font_color", TEXT_COLOR)
 				grid.add_child(lbl)
 				row_dict[col_name] = lbl
-
 			else:
-				# col_name ada di EDITABLE_COLUMNS (IAT, Layanan, Datang, Mulai, dst).
 				var edit := LineEdit.new()
 				edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 				edit.custom_minimum_size = Vector2(0, CELL_HEIGHT)
@@ -167,9 +180,7 @@ func _build_rows() -> void:
 				edit.add_theme_stylebox_override("read_only", edit_style)
 
 				if is_question_row:
-					# Baris 1-5: nanti diaktifkan (editable) & ikut dicek jawabannya.
 					edit.text_changed.connect(func(_t): _update_enter_button_visibility())
-				# Baris 6-10: tetap kosong & tidak pernah bisa diisi.
 
 				grid.add_child(edit)
 				row_dict[col_name] = edit
@@ -205,7 +216,6 @@ func _fill_locked_rows() -> void:
 			row_inputs[i][col_name].text = str(answers[i].get(col_name, ""))
 			row_inputs[i][col_name].editable = false
 
-# Munculkan tombol Enter kalau semua kolom jawaban di baris 1-5 sudah terisi.
 func _update_enter_button_visibility() -> void:
 	for i in QUESTION_ROWS:
 		for col_name in EDITABLE_COLUMNS:
@@ -221,30 +231,34 @@ func _on_enter_button_pressed() -> void:
 	_grade_rows()
 	_save_answers()
 
-	# Kunci semua field jawaban setelah diperiksa
 	for i in QUESTION_ROWS:
 		for col_name in EDITABLE_COLUMNS:
 			row_inputs[i][col_name].editable = false
 
-	# Kasih jeda sebentar biar warna merah/hijau kelihatan dulu sebelum pindah scene
 	await get_tree().create_timer(ENTER_TO_NEXT_DELAY).timeout
 
 	SimState.batch1_done = true
 	get_tree().change_scene_to_file(SimState.sleep_dialog_scene_path)
 
-# Bandingkan input siswa dengan kunci jawaban, warnai tiap sel (hijau/merah).
 func _grade_rows() -> bool:
 	var all_correct := true
 	for i in QUESTION_ROWS:
 		var expected: Dictionary = correct_answers[i]
 		for col_name in EDITABLE_COLUMNS:
 			var field: LineEdit = row_inputs[i][col_name]
-			var is_correct := _is_answer_correct(field.text, expected[col_name])
-			var bg := COLOR_CORRECT_BG if is_correct else COLOR_WRONG_BG
-			field.add_theme_stylebox_override("normal", _make_cell_style(bg))
-			field.add_theme_stylebox_override("read_only", _make_cell_style(bg))
-			if not is_correct:
+			var expected_val: float = expected[col_name]
+			var is_correct := _is_answer_correct(field.text, expected_val)
+			
+			if is_correct:
+				field.add_theme_stylebox_override("normal", _make_cell_style(COLOR_CORRECT_BG))
+				field.add_theme_stylebox_override("read_only", _make_cell_style(COLOR_CORRECT_BG))
+			else:
 				all_correct = false
+				# Ubah teks ke jawaban yang benar & warnai kotak jadi merah
+				field.text = str(expected_val)
+				field.add_theme_stylebox_override("normal", _make_cell_style(COLOR_WRONG_BG))
+				field.add_theme_stylebox_override("read_only", _make_cell_style(COLOR_WRONG_BG))
+				
 	return all_correct
 
 func _is_answer_correct(user_text: String, expected_value: float) -> bool:

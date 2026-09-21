@@ -310,23 +310,24 @@ position = Vector2(643, -57)
 script = ExtResource("3_kdubu")
 
 [node name="SpriteTeller" type="Sprite2D" parent="Teller" unique_id=1169517860]
-position = Vector2(0, 5)
+position = Vector2(-32, 6)
 texture = SubResource("AtlasTexture_uj04i")
 
-[node name="ExitCorner" type="Marker2D" parent="Teller" unique_id=1106545947]
-position = Vector2(0, 32)
+[node name="SpriteTeller2" type="Sprite2D" parent="Teller" unique_id=1955165863]
+position = Vector2(33, 7)
+texture = SubResource("AtlasTexture_uj04i")
 
 [node name="QueueAnchor" type="Marker2D" parent="Teller" unique_id=1458691653]
-position = Vector2(0, 48)
+position = Vector2(32, 48)
 
 [node name="ExitPoint" type="Marker2D" parent="Teller" unique_id=506713462]
 position = Vector2(-95, 31)
 
-[node name="ServicePoint" type="Marker2D" parent="Teller" unique_id=1699493097]
-position = Vector2(0, 32)
+[node name="TellerPoint1" type="Marker2D" parent="Teller" unique_id=160368731]
+position = Vector2(-32, 32)
 
-[node name="TellerPoint" type="Marker2D" parent="Teller" unique_id=160368731]
-position = Vector2(0, 32)
+[node name="TellerPoint2" type="Marker2D" parent="Teller" unique_id=764638340]
+position = Vector2(32, 31)
 
 [node name="TileMapLayer2" type="TileMapLayer" parent="." unique_id=713008971]
 position = Vector2(11, -98)
@@ -353,15 +354,14 @@ zoom = Vector2(4, 4)
 [node name="SpawnPoint" type="Marker2D" parent="." unique_id=1708814036]
 position = Vector2(642, 118)
 
-[node name="NPCSpawners" type="Node2D" parent="." unique_id=1884269880 node_paths=PackedStringArray("spawn_point", "entry_corner", "teller", "queue_slot", "exit_corner", "exit_point", "npc_container")]
+[node name="NPCSpawners" type="Node2D" parent="." unique_id=1884269880 node_paths=PackedStringArray("spawn_point", "teller_1", "teller_2", "queue_slot", "exit_point", "npc_container")]
 position = Vector2(642, 118)
 script = ExtResource("7_d21ai")
 npc_scene = ExtResource("8_rj586")
 spawn_point = NodePath("../SpawnPoint")
-entry_corner = NodePath("../EntryCorner")
-teller = NodePath("../Teller/TellerPoint")
+teller_1 = NodePath("../Teller/TellerPoint2")
+teller_2 = NodePath("../Teller/TellerPoint1")
 queue_slot = NodePath("../Teller/QueueAnchor")
-exit_corner = NodePath("../Teller/ExitCorner")
 exit_point = NodePath("../Teller/ExitPoint")
 npc_container = NodePath("../NPCs")
 
