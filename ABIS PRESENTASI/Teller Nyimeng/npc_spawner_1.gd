@@ -1,4 +1,4 @@
-extends Control
+extends Node2D
 
 const TOTAL_ROWS := 6
 
@@ -105,6 +105,11 @@ func _build_row(index: int) -> void:
 
 	input_iat.append(iat_input)
 
+	# Update status tombol Play tiap isi teks
+	iat_input.text_changed.connect(
+		func(_new_text): _update_start_button()
+	)
+
 
 	# =========================
 	# LAYANAN
@@ -117,6 +122,11 @@ func _build_row(index: int) -> void:
 	row["Layanan"] = layanan_input
 
 	input_layanan.append(layanan_input)
+
+	# Update status tombol Play tiap isi teks
+	layanan_input.text_changed.connect(
+		func(_new_text): _update_start_button()
+	)
 
 
 	# =========================
@@ -210,9 +220,10 @@ func _build_start_button() -> void:
 
 	start_button.text = "▶ Play"
 
+	# Posisikan tombol di bawah tabel
 	start_button.position = Vector2(
 		0,
-		40
+		120
 	)
 
 	start_button.custom_minimum_size = Vector2(
