@@ -18,7 +18,6 @@ config/icon="res://icon.svg"
 [autoload]
 
 SimState="*uid://dfub1krssf8ke"
-SimState2="*uid://8ormtmghmpb8"
 
 [display]
 
