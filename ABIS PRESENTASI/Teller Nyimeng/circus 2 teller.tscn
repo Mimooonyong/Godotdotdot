@@ -10,7 +10,6 @@
 [ext_resource type="PackedScene" uid="uid://bslpjmvfghahe" path="res://pomni.tscn" id="9_4yr7o"]
 [ext_resource type="PackedScene" uid="uid://roiejsbfoukf" path="res://ragatha.tscn" id="10_h6cxd"]
 [ext_resource type="PackedScene" uid="uid://cis1hfvma37f8" path="res://zooble.tscn" id="11_p5cbw"]
-[ext_resource type="PackedScene" uid="uid://daekwdnacspfx" path="res://gangle.tscn" id="12_rwa18"]
 [ext_resource type="Script" uid="uid://cwjym3poolbdi" path="res://npc.gd" id="13_luv6f"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tnw8g"]
@@ -144,12 +143,10 @@ position = Vector2(657, 247)
 
 [node name="NPCSpawner" type="Node2D" parent="." unique_id=1881706838 node_paths=PackedStringArray("spawn_point", "npc_container", "teller1_queue_slots", "teller1_service_point", "teller1_despawn_point", "teller2_queue_slots", "teller2_service_point", "teller2_despawn_point")]
 script = ExtResource("6_fm6it")
-npc_scenes = Array[PackedScene]([ExtResource("7_w7nd2"), ExtResource("8_ls83c"), ExtResource("9_4yr7o"), ExtResource("10_h6cxd"), ExtResource("11_p5cbw"), ExtResource("12_rwa18")])
-npc_ids = Array[String](["kinger", "jax", "pomni", "ragatha", "zooble", "gangle"])
-service_times = Array[float]([2.5, 12.0, 10.0, 6.0, 5.0, 3.0])
+npc_scenes = Array[PackedScene]([ExtResource("7_w7nd2"), ExtResource("8_ls83c"), ExtResource("9_4yr7o"), ExtResource("10_h6cxd"), ExtResource("11_p5cbw")])
 spawn_point = NodePath("../Teller/spawn")
 npc_container = NodePath("../NPC")
-teller1_queue_slots = [NodePath("../Teller/queue"), NodePath("../Teller/queue1"), NodePath("../Teller/queue2")]
+teller1_queue_slots = [NodePath("../Teller/queue"), NodePath("../Teller/queue1"), NodePath("../Teller2/queue2")]
 teller1_service_point = NodePath("../Teller/exit point")
 teller1_despawn_point = NodePath("../Teller/despawn")
 teller2_queue_slots = [NodePath("../Teller2/queue"), NodePath("../Teller2/queue1"), NodePath("../Teller2/queue2")]
@@ -167,7 +164,7 @@ animated_sprite = NodePath("AnimatedSprite2D")
 position = Vector2(559, 198.00002)
 scale = Vector2(1.1874999, 1.130951)
 sprite_frames = SubResource("SpriteFrames_p8eni")
-animation = &"done customer"
+animation = &"idle"
 
 [node name="spawn" type="Marker2D" parent="Teller2" unique_id=1939540854]
 position = Vector2(610, 505)

@@ -53,88 +53,248 @@ var last_result: Array = []
 
 
 # =========================================================
+# WARNA & GAYA
+# (palet sama seperti worksheet HTML-nya: biru/merah di atas paper)
+# =========================================================
+
+const INK          := Color("#1B2436")
+const SLATE        := Color("#5C6678")
+const PAPER        := Color("#F3F5FA")
+const PANEL_WHITE  := Color("#FFFFFF")
+
+const BLUE         := Color("#153E7B")
+const BLUE_LIGHT   := Color("#2758A8")
+const BLUE_TINT    := Color("#DCE7F7")
+
+const RED          := Color("#B3241E")
+const RED_LIGHT    := Color("#D8433C")
+const RED_TINT     := Color("#FBE0DE")
+
+const LINE         := Color("#DCE2ED")
+const LINE_STRONG  := Color("#B7C2D6")
+
+
+func _stylebox(bg: Color, border: Color = Color(0, 0, 0, 0),
+		border_w: int = 0, radius: int = 6,
+		margin_h: int = 10, margin_v: int = 6) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = bg
+	sb.border_color = border
+	sb.set_border_width_all(border_w)
+	sb.set_corner_radius_all(radius)
+	sb.content_margin_left = margin_h
+	sb.content_margin_right = margin_h
+	sb.content_margin_top = margin_v
+	sb.content_margin_bottom = margin_v
+	return sb
+
+
+# =========================================================
 # READY
 # =========================================================
 
 func _ready() -> void:
+	set_anchors_preset(Control.PRESET_FULL_RECT)
+
+	var bg_panel := PanelContainer.new()
+	bg_panel.add_theme_stylebox_override("panel", _stylebox(PAPER, LINE_STRONG, 1, 8, 0, 0))
+	bg_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(bg_panel)
+
+	var margin := MarginContainer.new()
+	for side in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override("margin_%s" % side, 26)
+	bg_panel.add_child(margin)
+
 	var root_vbox := VBoxContainer.new()
-	root_vbox.add_theme_constant_override("separation", 14)
-	add_child(root_vbox)
+	root_vbox.add_theme_constant_override("separation", 16)
+	margin.add_child(root_vbox)
+
+	# ---------- judul ----------
+	var title_panel := PanelContainer.new()
+	title_panel.add_theme_stylebox_override("panel", _stylebox(BLUE, Color(0,0,0,0), 0, 6, 20, 14))
+	root_vbox.add_child(title_panel)
 
 	var title := Label.new()
 	title.text = "SIMULASI ANTRIAN — 1 ANTRIAN, 2 TELLER"
 	title.add_theme_font_size_override("font_size", 20)
-	root_vbox.add_child(title)
+	title.add_theme_color_override("font_color", PANEL_WHITE)
+	title_panel.add_child(title)
+
+	# ---------- input ----------
+	var input_label := _section_label("Data Pelanggan (IAT & Layanan)")
+	root_vbox.add_child(input_label)
 
 	var input_grid := GridContainer.new()
 	input_grid.columns = 3
+	input_grid.add_theme_constant_override("h_separation", 2)
+	input_grid.add_theme_constant_override("v_separation", 2)
 	root_vbox.add_child(input_grid)
 
 	for header_text in ["N", "IAT", "Layanan"]:
-		input_grid.add_child(_make_label(header_text))
+		input_grid.add_child(_header_cell(header_text))
 
 	for i in TOTAL_ROWS:
-		input_grid.add_child(_make_label(str(i + 1)))
+		var alt: bool = (i % 2 == 1)
 
-		var iat_input := _make_input()
+		input_grid.add_child(_data_cell(str(i + 1), alt))
+
+		var iat_input := _make_input(alt)
 		input_grid.add_child(iat_input)
 		iat_inputs.append(iat_input)
 
-		var layan_input := _make_input()
+		var layan_input := _make_input(alt)
 		input_grid.add_child(layan_input)
 		layan_inputs.append(layan_input)
 
+	# ---------- tombol ----------
 	var button_row := HBoxContainer.new()
 	button_row.add_theme_constant_override("separation", 12)
 	root_vbox.add_child(button_row)
 
 	hitung_button = Button.new()
 	hitung_button.text = "Hitung Simulasi"
-	hitung_button.custom_minimum_size = Vector2(160, 36)
+	hitung_button.custom_minimum_size = Vector2(170, 40)
 	hitung_button.pressed.connect(_on_hitung_pressed)
+	_style_button(hitung_button, BLUE, BLUE_LIGHT, PANEL_WHITE)
 	button_row.add_child(hitung_button)
 
 	mulai_button = Button.new()
 	mulai_button.text = "▶ Mulai (ke Circus)"
-	mulai_button.custom_minimum_size = Vector2(180, 36)
+	mulai_button.custom_minimum_size = Vector2(190, 40)
 	mulai_button.disabled = true
 	mulai_button.pressed.connect(_on_mulai_pressed)
+	_style_button(mulai_button, RED, RED_LIGHT, PANEL_WHITE)
 	button_row.add_child(mulai_button)
 
-	var result_title := Label.new()
-	result_title.text = "Hasil"
-	root_vbox.add_child(result_title)
+	# ---------- hasil ----------
+	var result_label := _section_label("Hasil Simulasi")
+	root_vbox.add_child(result_label)
+
+	var result_scroll := ScrollContainer.new()
+	result_scroll.custom_minimum_size = Vector2(0, 260)
+	root_vbox.add_child(result_scroll)
 
 	result_grid = GridContainer.new()
 	result_grid.columns = RESULT_COLUMNS.size()
-	root_vbox.add_child(result_grid)
+	result_grid.add_theme_constant_override("h_separation", 2)
+	result_grid.add_theme_constant_override("v_separation", 2)
+	result_scroll.add_child(result_grid)
 	_build_result_header()
 
 
 func _build_result_header() -> void:
 	for column in RESULT_COLUMNS:
-		result_grid.add_child(_make_label(column))
+		result_grid.add_child(_header_cell(column))
 
 
 # =========================================================
-# LABEL & INPUT HELPER
+# SECTION LABEL
 # =========================================================
 
-func _make_label(text_value: String) -> Label:
+func _section_label(text_value: String) -> Label:
+	var label := Label.new()
+	label.text = text_value
+	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_color_override("font_color", SLATE)
+	return label
+
+
+# =========================================================
+# SEL TABEL (header & data), DIBUNGKUS PanelContainer BIAR
+# ADA WARNA LATAR & GARIS PEMISAH
+# =========================================================
+
+func _header_cell(text_value: String) -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _stylebox(BLUE, Color(0,0,0,0), 0, 0, 8, 7))
+	panel.custom_minimum_size = Vector2(74, 0)
+
 	var label := Label.new()
 	label.text = text_value
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.custom_minimum_size = Vector2(70, 32)
-	return label
+	label.add_theme_font_size_override("font_size", 13)
+	label.add_theme_color_override("font_color", PANEL_WHITE)
+	panel.add_child(label)
+	return panel
 
 
-func _make_input() -> LineEdit:
+func _data_cell(text_value: String, alt: bool = false, accent: Color = INK) -> PanelContainer:
+	var bg: Color = BLUE_TINT if alt else PANEL_WHITE
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _stylebox(bg, LINE, 1, 0, 8, 7))
+	panel.custom_minimum_size = Vector2(74, 0)
+
+	var label := Label.new()
+	label.text = text_value
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 13)
+	label.add_theme_color_override("font_color", accent)
+	panel.add_child(label)
+	return panel
+
+
+# kartu kecil warna beda buat "Teller 1" / "Teller 2" biar gampang dibedain
+func _teller_cell(teller_id: int, alt: bool) -> PanelContainer:
+	var bg: Color = RED_TINT if teller_id == 1 else BLUE_TINT
+	var fg: Color = RED if teller_id == 1 else BLUE
+
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _stylebox(bg, LINE, 1, 0, 8, 7))
+	panel.custom_minimum_size = Vector2(74, 0)
+
+	var label := Label.new()
+	label.text = "Teller %d" % teller_id
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 12)
+	label.add_theme_color_override("font_color", fg)
+	panel.add_child(label)
+	return panel
+
+
+# =========================================================
+# INPUT HELPER
+# =========================================================
+
+func _make_input(alt: bool = false) -> LineEdit:
 	var input := LineEdit.new()
 	input.placeholder_text = "0"
 	input.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	input.custom_minimum_size = Vector2(70, 32)
+	input.custom_minimum_size = Vector2(74, 34)
+
+	var bg: Color = BLUE_TINT if alt else PANEL_WHITE
+	var normal := _stylebox(bg, LINE_STRONG, 1, 4, 8, 4)
+	var focus := _stylebox(PANEL_WHITE, RED, 2, 4, 8, 4)
+
+	input.add_theme_stylebox_override("normal", normal)
+	input.add_theme_stylebox_override("focus", focus)
+	input.add_theme_color_override("font_color", INK)
+	input.add_theme_color_override("font_placeholder_color", LINE_STRONG)
 	return input
+
+
+# =========================================================
+# TOMBOL HELPER
+# =========================================================
+
+func _style_button(button: Button, base_color: Color, hover_color: Color, text_color: Color) -> void:
+	var normal := _stylebox(base_color, Color(0,0,0,0), 0, 5, 16, 10)
+	var hover := _stylebox(hover_color, Color(0,0,0,0), 0, 5, 16, 10)
+	var pressed := _stylebox(base_color.darkened(0.15), Color(0,0,0,0), 0, 5, 16, 10)
+	var disabled := _stylebox(LINE_STRONG, Color(0,0,0,0), 0, 5, 16, 10)
+
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_stylebox_override("hover", hover)
+	button.add_theme_stylebox_override("pressed", pressed)
+	button.add_theme_stylebox_override("disabled", disabled)
+	button.add_theme_color_override("font_color", text_color)
+	button.add_theme_color_override("font_hover_color", text_color)
+	button.add_theme_color_override("font_pressed_color", text_color)
+	button.add_theme_color_override("font_disabled_color", SLATE)
+	button.add_theme_font_size_override("font_size", 14)
 
 
 # =========================================================
@@ -226,23 +386,25 @@ func _simulate_two_tellers(customers: Array) -> void:
 # =========================================================
 
 func _render_result(customers: Array) -> void:
-	# buang semua baris hasil lama, sisakan header (10 label pertama)
+	# buang semua baris hasil lama, sisakan header (10 sel pertama)
 	var children := result_grid.get_children()
 	for i in range(RESULT_COLUMNS.size(), children.size()):
 		children[i].queue_free()
 
 	for i in customers.size():
 		var c: Dictionary = customers[i]
-		result_grid.add_child(_make_label(str(c["n"])))
-		result_grid.add_child(_make_label(_fmt(c["iat"])))
-		result_grid.add_child(_make_label(_fmt(c["layan"])))
-		result_grid.add_child(_make_label(_fmt(c["datang"])))
-		result_grid.add_child(_make_label("Teller %d" % c["teller"]))
-		result_grid.add_child(_make_label(_fmt(c["mulai"])))
-		result_grid.add_child(_make_label(_fmt(c["selesai"])))
-		result_grid.add_child(_make_label(_fmt(c["antri"])))
-		result_grid.add_child(_make_label(_fmt(c["sistem"])))
-		result_grid.add_child(_make_label(_fmt(c["idle"])))
+		var alt: bool = (i % 2 == 1)
+
+		result_grid.add_child(_data_cell(str(c["n"]), alt))
+		result_grid.add_child(_data_cell(_fmt(c["iat"]), alt))
+		result_grid.add_child(_data_cell(_fmt(c["layan"]), alt))
+		result_grid.add_child(_data_cell(_fmt(c["datang"]), alt))
+		result_grid.add_child(_teller_cell(c["teller"], alt))
+		result_grid.add_child(_data_cell(_fmt(c["mulai"]), alt))
+		result_grid.add_child(_data_cell(_fmt(c["selesai"]), alt))
+		result_grid.add_child(_data_cell(_fmt(c["antri"]), alt, RED))
+		result_grid.add_child(_data_cell(_fmt(c["sistem"]), alt))
+		result_grid.add_child(_data_cell(_fmt(c["idle"]), alt, SLATE))
 
 
 func _fmt(value: float) -> String:
