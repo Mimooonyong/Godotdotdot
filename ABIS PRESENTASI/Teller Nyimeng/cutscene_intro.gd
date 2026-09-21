@@ -5,7 +5,7 @@ extends Control
 
 var dialog_lines: Array = [
 	{"name": "Sierra", "text": "Kata dosen, aku disuruh menghitung waktu teller melayani."},
-	{"name": "Sierra", "text": "Wah, ribet juga ya tugasnya."}
+	{"name": "Sierra", "text": "Worksheet yang diberikan adalah worksheet berdasarkan pengamatanku."}
 ]
 
 var current_line: int = 0

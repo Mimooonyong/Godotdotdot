@@ -5,7 +5,8 @@ extends Control
 
 var dialog_lines: Array = [
 	{"name": "Sierra", "text": "Sudah ada 5 orang, tetapi tempat terlihat sepi"},
-	{"name": "Sierra", "text": "Aku akan mulai menghitung saja. Lumayan untuk menyicil."}
+	{"name": "Sierra", "text": "Aku akan mulai menghitung saja. Lumayan untuk menyicil."},
+	{"name": "Sierra", "text": "Semoga aja pengamatanku benar."}
 ]
 
 var current_line: int = 0
